@@ -1,2 +1,10 @@
-flask
+Flask
+requests
+cloudscraper
+beautifulsoup4
+openai
+certifi
+charset-normalizer
+idna
+urllib3
 gunicorn
