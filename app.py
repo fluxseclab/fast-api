@@ -24,7 +24,8 @@ def fetch_and_extract(url):
         start_idx = r.text.index('<h1')
         end_idx = r.text.index('Found this article interesting?')
         final_text = r.text[start_idx:end_idx].strip().replace('\n', '')
-
+        final_text += '</div>'
+        
         cache[url] = final_text
         return final_text
 
