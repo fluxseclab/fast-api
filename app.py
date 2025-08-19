@@ -20,15 +20,10 @@ def fetch_and_extract(url):
     try:
         r = scraper.get(url)
         r.raise_for_status()
-        plain_text = BeautifulSoup(r.text, 'html.parser').get_text()
-        cleaned_text = "\n".join([line.strip() for line in plain_text.splitlines() if line.strip()])
 
-        if 'Email Alerts' in cleaned_text and 'Found this article interesting' in cleaned_text:
-            start_idx = cleaned_text.index('Email Alerts') + 12
-            end_idx = cleaned_text.index('Found this article interesting')
-            final_text = cleaned_text[start_idx:end_idx].strip()
-        else:
-            final_text = cleaned_text
+        start_idx = r.text.index('<h1')
+        end_idx = r.text.index('Found this article interesting?')
+        final_text = r.text[start_idx:end_idx].strip().replace('\n', '')
 
         cache[url] = final_text
         return final_text
