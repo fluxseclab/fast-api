@@ -30,8 +30,11 @@ def fetch_and_extract(url):
 
         soup = BeautifulSoup(response.text, "html.parser")
         
-        cache[url] = soup.get_text()
-        return cache[url]
+        text = soup.get_text(separator=" ")
+        clean_text = " ".join(text.split())
+        
+        cache[url] = clean_text
+        return clean_text
 
     except Exception as e:
         print(f"Error extracting {url}: {e}")
