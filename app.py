@@ -58,7 +58,7 @@ def scrape():
 def home():
     
     try:
-        response = req.get('https://thehackernews.com/')
+        response = requests.get('https://thehackernews.com/')
         response.raise_for_status()
         urls = set()
         lines = response.text.split('\n')
