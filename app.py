@@ -1,37 +1,42 @@
-import requests as req
-import cloudscraper
 import os
 import random
+import requests
+import cloudscraper
+
 from bs4 import BeautifulSoup
-from flask import Flask, jsonify, request
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from flask import (Flask,
+    jsonify,
+    request
+)
+from concurrent.futures import (
+    ThreadPoolExecutor,
+    as_completed
+)
+
 
 app = Flask(__name__)
 scraper = cloudscraper.create_scraper()
-
 cache = {}
-
 MAX_THREADS = 10
+
 
 def fetch_and_extract(url):
     if url in cache:
         return cache[url]
 
     try:
-        r = scraper.get(url)
-        r.raise_for_status()
+        response = scraper.get(url)
+        response.raise_for_status()
 
-        start_idx = r.text.index('<h1')
-        end_idx = r.text.index('Found this article interesting?')
-        final_text = r.text[start_idx:end_idx].strip().replace('\n', '')
-        final_text += '</div>'
+        soup = BeautifulSoup(response.text, "html.parser")
         
-        cache[url] = final_text
-        return final_text
+        cache[url] = soup.get_text()
+        return cache[url]
 
     except Exception as e:
         print(f"Error extracting {url}: {e}")
         return None
+
 
 @app.route("/scrape")
 def scrape():
@@ -51,7 +56,7 @@ def scrape():
 
 @app.route("/")
 def home():
-
+    
     try:
         response = req.get('https://thehackernews.com/')
         response.raise_for_status()
@@ -73,6 +78,7 @@ def home():
         print(f"Home Page Fetch Error: {e}")
         return jsonify({"error": str(e)}), 500
 
+
 def extract_url(line):
     try:
         start_idx = line.index('href=') + 6
@@ -81,9 +87,11 @@ def extract_url(line):
     except ValueError:
         return None
 
+
 @app.route("/ping")
 def ping():
     return jsonify({"status": "ok"})
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
