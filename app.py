@@ -39,7 +39,7 @@ def fetch_and_extract(url):
             input= f'این متن رو به فارسی ترجمه کن به صورت تخصصی برای هکر ها و برنامه نویسان و بعد از اون فقط با html tag ها استایل دهیش کن بدون هیچگونه css و اینم بدون که این بخشی از یک فایل html است قراره این بین یک فایل base.html لود بشه محتواش پس نیاز نیست tag های تکراری html رو بنویسی فقط و فقط تگ main که محتواش رو هم خودت ترجمه میکنی  :"{clean_text}"'
         )
         
-        cache[url] = response.output_text.strip('```html').strip('```')
+        cache[url] = response.output_text.strip('```html').strip('```').replace('\n', '')
         return response.output_text.strip('```html').strip('```')
 
     except Exception as e:
