@@ -17,7 +17,8 @@ from openai import OpenAI
 
 app = Flask(__name__)
 scraper = cloudscraper.create_scraper()
-client = OpenAI(os.getenv('OPENAI_API_KEY'))
+AI_KEY = os.getenv('OPENAI_API_KEY')
+client = OpenAI(api_key=AI_KEY)
 cache = {}
 MAX_THREADS = 10
 
@@ -88,12 +89,10 @@ def home():
 
 
 def extract_url(line):
-    try:
-        start_idx = line.index('href=') + 6
-        end_idx = line.index('.html') + 5
-        return line[start_idx:end_idx]
-    except ValueError:
-        return None
+    soup = BeautifulSoup(line, "html.parser")
+    a = soup.find("a", href=True)
+    return a['href'] if a and a['href'].endswith('.html') else None
+
 
 
 @app.route("/ping")
