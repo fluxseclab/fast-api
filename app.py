@@ -12,10 +12,12 @@ from concurrent.futures import (
     ThreadPoolExecutor,
     as_completed
 )
+from openai import OpenAI
 
 
 app = Flask(__name__)
 scraper = cloudscraper.create_scraper()
+client = OpenAI(os.getenv('OPENAI_API_KEY'))
 cache = {}
 MAX_THREADS = 10
 
@@ -28,17 +30,20 @@ def fetch_and_extract(url):
         response = scraper.get(url)
         response.raise_for_status()
 
-        soup = BeautifulSoup(response.text, "html.parser")
-        
-        text = soup.get_text(separator=" ")
+        text = BeautifulSoup(response.text, "html.parser").get_text(separator=" ")
         clean_text = " ".join(text.split())
         
-        cache[url] = clean_text
-        return clean_text
+        response = client.responses.create(
+            model='gpt-4o-mini',
+            input= f'این متن رو به فارسی ترجمه کن به صورت تخصصی برای هکر ها و برنامه نویسان و بعد از اون فقط با html tag ها استایل دهیش کن بدون هیچگونه css و اینم بدون که این بخشی از یک فایل html است قراره این بین یک فایل base.html لود بشه محتواش پس نیاز نیست tag های تکراری html رو بنویسی فقط و فقط تگ main که محتواش رو هم خودت ترجمه میکنی  :"{clean_text}"'
+        )
+        
+        cache[url] = response.output_text.strip('```html').strip('```')
+        return response.output_text.strip('```html').strip('```')
 
     except Exception as e:
         print(f"Error extracting {url}: {e}")
-        return None
+        return clean_text
 
 
 @app.route("/scrape")
